@@ -10,7 +10,7 @@ Maxwell's equations govern electromagnetic phenomena, but most real-world proble
 
 Starting from the two coupled curl equations in a source-free, lossless medium, the continuous derivatives are discretized into finite differences and solved on a computational grid.
 
-![Mathematical foundation of the 1D Maxwell's equations](assets/maxwell-1d-foundation.png)
+![Mathematical foundation of the 1D Maxwell's equations](docs/maxwell-1d-foundation.png)
 
 The 1D system reduces to a coupled pair of first-order PDEs:
 
@@ -23,7 +23,7 @@ The 1D system reduces to a coupled pair of first-order PDEs:
 
 Running the simulation shows the Gaussian pulse propagating along the domain. The plot below compares the FDTD solution (blue, CFL-constrained) against the Crank-Nicolson solution (red, running at 4× the time step).
 
-![Electric field vs. position](assets/electric-field-vs-position.png)
+![Electric field vs. position](docs/electric-field-vs-position.png)
 
 ## The Two Methods
 
@@ -37,23 +37,23 @@ Running the simulation shows the Gaussian pulse propagating along the domain. Th
 | Key weakness | Stability constraint forces tiny time steps on fine grids | Heavier, more complex steps |
 | Typical use | Broadband pulse propagation, large simple geometries | Problems needing large time steps relative to grid size |
 
-![FDTD vs. Crank-Nicolson comparison](assets/fdtd-vs-crank-nicolson.png)
+![FDTD vs. Crank-Nicolson comparison](docs/fdtd-vs-crank-nicolson.png)
 
 ### FDTD: The Explicit Method
 
 FDTD uses the staggered **Yee grid**, where E-field and H-field components are evaluated at different points in both space and time.
 
-![The Yee grid](assets/yee-grid-fdtd.png)
+![The Yee grid](docs/yee-grid-fdtd.png)
 
 Time-stepping follows a **leapfrog** scheme: the future field is computed directly from past values, with no matrix inversion. This makes each step fast, but the method is bound by the Courant-Friedrichs-Lewy (CFL) condition.
 
-![The leapfrog update algorithm](assets/leapfrog-algorithm.png)
+![The leapfrog update algorithm](docs/leapfrog-algorithm.png)
 
 ### The CFL Stability Condition
 
 For FDTD to stay stable, the numerical wave cannot travel more than one grid cell per time step. In 1D this means `c·Δt ≤ Δz`. A fine spatial grid therefore forces small time steps, which can make simulations expensive.
 
-![The CFL stability condition](assets/cfl-stability.png)
+![The CFL stability condition](docs/cfl-stability.png)
 
 ### Crank-Nicolson: The Implicit Method
 
@@ -63,7 +63,7 @@ Crank-Nicolson averages the spatial derivative over the current and future time 
 
 A key artifact demonstrated by the simulation is **numerical dispersion**: in a vacuum all frequencies travel at exactly `c`, but on a discrete grid, frequencies with wavelengths approaching `Δz` are artificially slowed. This causes the pulse to spread and distort as it propagates. A finer grid (more points per wavelength) reduces this error.
 
-![Numerical dispersion](assets/numerical-dispersion.png)
+![Numerical dispersion](docs/numerical-dispersion.png)
 
 ## Repository Structure
 
