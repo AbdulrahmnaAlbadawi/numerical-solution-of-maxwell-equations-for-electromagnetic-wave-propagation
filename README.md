@@ -8,14 +8,22 @@ This was developed as a course project for **MAT232E**.
 
 Maxwell's equations govern electromagnetic phenomena, but most real-world problems are too complex for analytical solutions. This project demonstrates two computational engines for solving the 1D time-domain Maxwell's equations and highlights the engineering trade-offs between them.
 
-Starting from the two coupled curl equations in a source-free, lossless medium:
+Starting from the two coupled curl equations in a source-free, lossless medium, the continuous derivatives are discretized into finite differences and solved on a computational grid.
+
+![Mathematical foundation of the 1D Maxwell's equations](assets/maxwell-1d-foundation.png)
+
+The 1D system reduces to a coupled pair of first-order PDEs:
 
 ```
 μ₀ ∂Hy/∂t = ∂Ex/∂z
 ε₀ ∂Ex/∂t = ∂Hy/∂z
 ```
 
-the continuous derivatives are discretized into finite differences and solved on a computational grid.
+## Results
+
+Running the simulation shows the Gaussian pulse propagating along the domain. The plot below compares the FDTD solution (blue, CFL-constrained) against the Crank-Nicolson solution (red, running at 4× the time step).
+
+![Electric field vs. position](assets/electric-field-vs-position.png)
 
 ## The Two Methods
 
@@ -29,9 +37,33 @@ the continuous derivatives are discretized into finite differences and solved on
 | Key weakness | Stability constraint forces tiny time steps on fine grids | Heavier, more complex steps |
 | Typical use | Broadband pulse propagation, large simple geometries | Problems needing large time steps relative to grid size |
 
-**FDTD** uses the staggered Yee grid with leapfrog time-stepping: the future field is computed directly from past values, with no matrix inversion. Fast per step, but bound by the Courant-Friedrichs-Lewy (CFL) condition.
+![FDTD vs. Crank-Nicolson comparison](assets/fdtd-vs-crank-nicolson.png)
 
-**Crank-Nicolson** averages the spatial derivative over the current and future time steps, producing a tridiagonal system that must be solved at every step. This breaks the CFL "speed limit" and remains stable for any `Δt` — in this simulation it uses a time step 4× larger than the FDTD limit.
+### FDTD: The Explicit Method
+
+FDTD uses the staggered **Yee grid**, where E-field and H-field components are evaluated at different points in both space and time.
+
+![The Yee grid](assets/yee-grid-fdtd.png)
+
+Time-stepping follows a **leapfrog** scheme: the future field is computed directly from past values, with no matrix inversion. This makes each step fast, but the method is bound by the Courant-Friedrichs-Lewy (CFL) condition.
+
+![The leapfrog update algorithm](assets/leapfrog-algorithm.png)
+
+### The CFL Stability Condition
+
+For FDTD to stay stable, the numerical wave cannot travel more than one grid cell per time step. In 1D this means `c·Δt ≤ Δz`. A fine spatial grid therefore forces small time steps, which can make simulations expensive.
+
+![The CFL stability condition](assets/cfl-stability.png)
+
+### Crank-Nicolson: The Implicit Method
+
+Crank-Nicolson averages the spatial derivative over the current and future time steps, producing a tridiagonal system that must be solved at every step. This breaks the CFL "speed limit" and remains stable for any `Δt` — in this simulation it uses a time step 4× larger than the FDTD limit.
+
+## Numerical Dispersion
+
+A key artifact demonstrated by the simulation is **numerical dispersion**: in a vacuum all frequencies travel at exactly `c`, but on a discrete grid, frequencies with wavelengths approaching `Δz` are artificially slowed. This causes the pulse to spread and distort as it propagates. A finer grid (more points per wavelength) reduces this error.
+
+![Numerical dispersion](assets/numerical-dispersion.png)
 
 ## Repository Structure
 
@@ -39,6 +71,7 @@ the continuous derivatives are discretized into finite differences and solved on
 .
 ├── matlab/        # MATLAB simulation source
 ├── docs/          # Presentation slides and supporting material
+├── assets/        # Figures used in this README
 └── README.md
 ```
 
@@ -66,10 +99,6 @@ Requires **MATLAB** (no additional toolboxes needed).
 | `dt_cn` | `4·dt_fdtd` | Crank-Nicolson time step |
 
 The source is a Gaussian pulse injected at one-third of the domain length, with **Perfect Electric Conductor (PEC)** boundaries.
-
-## Numerical Dispersion
-
-A key artifact demonstrated by the simulation is **numerical dispersion**: in a vacuum all frequencies travel at exactly `c`, but on a discrete grid, frequencies with wavelengths approaching `Δz` are artificially slowed. This causes the pulse to spread and distort as it propagates. A finer grid (more points per wavelength) reduces this error.
 
 ## Key Takeaway
 
